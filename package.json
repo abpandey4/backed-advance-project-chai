@@ -1,0 +1,16 @@
+{
+  "name": "backend-chai-advance",
+  "version": "1.0.0",
+  "description": "A backend advance",
+  "keywords": [
+    "Javascript",
+    "backend"
+  ],
+  "license": "ISC",
+  "author": "Abhishek Pandey",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
