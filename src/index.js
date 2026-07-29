@@ -1,14 +1,24 @@
 import dns from "node:dns";
 import dotenv from "dotenv"
 import connectDB from "./db/index.js";
+import app from "./app.js";
 
-dns.setServers(["8.8.8.8", "8.8.4.4"]);
+
+dns.setServers(["8.8.8.8", "8.8.4.4"]);    // this was google dns ip address
 dotenv.config({
     path: './.env'
 })
-connectDB();
-
-
+connectDB()
+.then(()=>{
+    app.listen(process.env.PORT || 8000, ()=>{
+        console.log(`Serrver is running at Port ${process.env.PORT}`);
+        
+    })
+})
+.catch((err)=>{
+    console.log("MONGODB connection fail:", err);
+    
+})
 
 
 
@@ -35,6 +45,7 @@ connectDB();
 
 // first way to connect DB ...but not using this method because we have coonected using 
 //second method in DB file separte file 
+
 /*
 import express from "express"
 
