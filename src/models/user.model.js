@@ -52,7 +52,7 @@ const userSchema = new Schema(
 )
 
 userSchema.pre("save", async function(next){        // to encrypt before saving we use this pre hook from (mongoose middleware)
-    if(!this.isModified("password")) return next()
+    if(!this.isModified("password")) return next()  // ismodified is builtin methods
     
     this.password = bcrypt.hash(this.password, 10)
     next()
@@ -64,7 +64,7 @@ userSchema.methods.isPasswordCorrect = async function(password){        //create
 }  
 
 userSchema.methods.generateAccessToken = async function(){             //created methods to inject in schema for access token its a jwt token
-   return jwt.sign(                                                          // sign generate the token
+   return jwt.sign(                                                          // sign() generate the token
         {
           _id: this._id,
           email:this.email,
@@ -79,7 +79,7 @@ userSchema.methods.generateAccessToken = async function(){             //created
 }     
 
 userSchema.methods.generateRefreshToken = async function(){
-     return jwt.sign(                                                          // sign generate the token
+     return jwt.sign(                                                          // sign() generate the token
         {
           _id: this._id,
         },
@@ -89,7 +89,4 @@ userSchema.methods.generateRefreshToken = async function(){
         }
     )  
 }
-
-
-
 export const User = mongoose.model("User", userSchema)
