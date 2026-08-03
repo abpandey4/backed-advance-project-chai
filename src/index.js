@@ -22,26 +22,6 @@ connectDB()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // first way to connect DB ...but not using this method because we have coonected using 
 //second method in DB file separte file 
 
