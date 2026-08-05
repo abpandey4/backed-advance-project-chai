@@ -3,7 +3,7 @@
   
  cloudinary.config({ 
         cloud_name: process.env.CLOUINARY_CLOUD_NAME, 
-        api_key: proces.env.CLOUDINARY_API_KEY, 
+        api_key: process.env.CLOUDINARY_API_KEY, 
         api_secret: process.env.CLOUDINARY_API_SECRET
  });
 
