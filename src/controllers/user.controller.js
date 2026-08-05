@@ -21,7 +21,7 @@ const registerUser = asyncHandler(async(req,res)=>{
     const {username, fullname, email, password} = req.body;        //get user data from frontend
     console.log("Email:", email)
 
-    if(fullname === ""){                                        // validation 
+    if(fullname === ""){                                        // validation    
         throw new apiError(400, "Fullname is required")
     }
     if(email === ""){
@@ -34,11 +34,21 @@ const registerUser = asyncHandler(async(req,res)=>{
         throw new apiError(400, "Password is required")
     }
 
+
+    /* OR we can also write in one line code (this work is done in 1 line in chai-code tutorial but to understand better we did in this way )*/
+/*
+            if(
+                [fullname, email, password, username].some(field => !field?.trim())
+            ){
+                throw new apiError(400, "all feilds are required")
+            }
+*/
+
     const existedUser = User.findOne({                     // check if user already exists
         $or: [{ username },{ email }]
     })
 
-    if(exitedUser){
+    if(existedUser){
         throw new apiError(409, "User with Email or Username already Exists")
     }
 
@@ -82,7 +92,6 @@ const registerUser = asyncHandler(async(req,res)=>{
     return res.status(201).json(
         new apiResponse(200, createdUser, "User Registered successfully")                                        // created new object of apiResponse
     )
-
 })
 
 export default registerUser;
