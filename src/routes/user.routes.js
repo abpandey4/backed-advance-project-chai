@@ -9,11 +9,11 @@ router.route("/register").post(                   // POST send data to server
     upload.fields([                         // here we have injected middleware to registerUser upload is multer middleware...we have imported can check
         {
             name: "avatar",
-            maxCount: 1                    // maxcount: means how much file should accept
+            maxCount: 1,                   // maxcount: means how much file should accept
         },
         {
             name: "coverImage",
-            maxCount: 1 
+            maxCount: 1, 
         }
     ]),
     registerUser

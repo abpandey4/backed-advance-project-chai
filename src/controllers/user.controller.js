@@ -19,7 +19,7 @@ const registerUser = asyncHandler(async(req,res)=>{
     // return response(res)
 
     const {username, fullname, email, password} = req.body;        //get user data from frontend
-    console.log("Email:", email)
+    console.log("Email:", email)                                   // just to test we consoled this 
 
     if(fullname === ""){                                        // validation    
         throw new apiError(400, "Fullname is required")
@@ -44,7 +44,7 @@ const registerUser = asyncHandler(async(req,res)=>{
             }
 */
 
-    const existedUser = User.findOne({                     // check if user already exists
+    const existedUser = await User.findOne({                     // check if user already exists
         $or: [{ username },{ email }]
     })
 
@@ -52,8 +52,8 @@ const registerUser = asyncHandler(async(req,res)=>{
         throw new apiError(409, "User with Email or Username already Exists")
     }
 
-    const avatarLocalPath = req.files?.avatar[0]?.path             // check for coverImage and avatar in local storage   
-    const coverImageLocalPath = req.files?.coverImage[0]?.path      // [0] means first file uplaoded in array of files 
+    const avatarLocalPath = req.files?.avatar?.[0]?.path             // check for coverImage and avatar in local storage   
+    const coverImageLocalPath = req.files?.coverImage?.[0]?.path      // [0] means first file uplaoded in array of files 
                                                                     // ?. if files exists access avatar and if avatar[0] exists return its path
                                                                     
     if(!avatarLocalPath){
@@ -90,7 +90,7 @@ const registerUser = asyncHandler(async(req,res)=>{
     // return response(res)
 
     return res.status(201).json(
-        new apiResponse(200, createdUser, "User Registered successfully")                                        // created new object of apiResponse
+        new apiResponse(200, createdUser, "User Registered successfully")                      // created new object of apiResponse
     )
 })
 

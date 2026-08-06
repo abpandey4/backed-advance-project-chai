@@ -51,11 +51,10 @@ const userSchema = new Schema(
     }
 )
 
-userSchema.pre("save", async function(next){        // to encrypt before saving we use this pre hook from (mongoose middleware)
-    if(!this.isModified("password")) return next()  // ismodified is built-in methods
+userSchema.pre("save", async function(){        // to encrypt before saving we use this pre hook from (mongoose middleware)
+    if(!this.isModified("password")) return  // ismodified is built-in methods
     
     this.password = await bcrypt.hash(this.password, 10)
-    next()
 })  
 
 
