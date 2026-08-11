@@ -64,8 +64,8 @@ userSchema.methods.isPasswordCorrect = async function(password){        //create
 
 userSchema.methods.generateAccessToken = function(){             //created methods to inject in schema for access token its a jwt token
    return jwt.sign(                                                          // sign() generate the token
-        {
-          _id: this._id,
+        {                                                                 // access token is short lived and refresh token is session/long lived
+          _id: this._id,                                          // refresh token is saved in DB and whenever we required we can take that token 
           email:this.email,
           username: this.username,
           fullname: this.fullname
