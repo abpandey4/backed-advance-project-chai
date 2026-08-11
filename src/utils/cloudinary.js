@@ -16,13 +16,13 @@
 
             const response = await cloudinary.uploader.upload
             (localFilePath,{
-                resource_type: "auto"
+                resource_type: "auto"           //which type of file to upload image vidoe,pdf etc
             })
             
              // file has been uploaded successfully
 
             //console.log("file is uploaded on cloudinary", response.url)
-            fs.unlinkSync(localFilePath)
+            fs.unlinkSync(localFilePath)                         
             return response;
     }catch(error){
         fs.unlinkSync(localFilePath)    // remove the locally saved temp file as the upload operation failed

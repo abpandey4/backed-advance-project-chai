@@ -4,9 +4,25 @@ import { User } from "../models/user.model.js";
 import uploadOnCloudinary from "../utils/cloudinary.js";
 import { apiResponse } from "../utils/apiResponse.js";
 
+const genrateAccessandRefreshToken = async(userId)=>{        // creating method for genration of access and ref token for login user
+    try {
+       const user =  await User.findById(userId)
+       const accessToken = user.generateAccessToken()       // we give access token to user
+       const refreshToken = user.generateRefreshToken()     // refresh token we also keep in DB soo that user to need to write password everytime after the session timeout
+       
+       user.refreshToken = refreshToken
+       await user.save({validateBeforeSave: false})                                          // .save() user getting saved  & validateBeforeSave is mongoose fn means valdiation mat lagao direct save kardo
+
+       return{accessToken, refreshToken}
+
+    } catch (error) {
+        throw new apiError(500, "something went wrong while generating access and refresh token")
+    }
+}
+
 const registerUser = asyncHandler(async(req,res)=>{
     
-   // steps to register user
+    // steps to register user
 
     // get User data from frontend(here we are going to take from postman)
     // validation of data - not empty
@@ -94,4 +110,93 @@ const registerUser = asyncHandler(async(req,res)=>{
     )
 })
 
-export default registerUser;
+const loginUser = asyncHandler(async(req,res)=>{
+
+    // steps to loginUser
+
+    // get user data from req.body
+    // username or email
+    // find the user
+    // password check
+    // access token & refreshtoken generation
+    // send refresh token and access token in cookies(which is send cookies)
+
+    const {email, username, password} = req.body    // getting user data from frontend or req.body
+
+    if(!username || !email){                       // here we'r doing with either email or username ...if we want to do with any of one then remove the remaining one like username or email 
+        throw new apiError(400, "Username or Email is required")
+    }
+
+    const user = await User.findOne({                      // finding user from username or email ...on the base of anyone a data/user should get 
+        $or: [{username},{email}]                          // $or means yaa to username k base pe mil jaaye yaa phir email k base pe mil jaaye 
+    })                                                     // $or and etc are mongodb operators
+
+    if(!user){
+        throw new apiError(404, "User does'nt exists")
+    }
+
+    const isPasswordValid = await user.isPasswordCorrect(password)       // password check
+
+    if(!isPasswordValid){
+        throw new apiError(401, "Invalid User Credentials")
+    }
+
+    const {accessToken, refreshToken} = await genrateAccessandRefreshToken(user._id)   // generating refresh and access token 
+
+    const loggedInUser = await User.findById(user._id).select      // optional step ...if want to use ..otherwise let it be 
+    ("-password -refreshToken")
+    
+
+    const options ={                // otherwise by default even frontend can also modify the cookies        
+        httpOnly: true,             // by using this code the cookies are modified by only servers so frontend guys cant modified      
+        secure: true              
+    }
+
+    return res                              // res send and also cookie
+    .status(200)                                     
+    .cookie("accessToken", accessToken, options)        // set access token and refresh token here 
+    .cookie("refreshToken", refreshToken, options)
+    .json(                                              // sending json response here 
+        new apiResponse(200,
+            {
+              user: loggedInUser, refreshToken, accessToken    //here we tooked tokens again beacuse if the user want to store 
+                                                              //that token in local storage or somewhere else so we again wrote tokens here
+            },                                                // and also remember this user field is data check in apiResponse.js
+            "User Logged In Successfully"
+           
+        )
+    )
+})
+
+const logoutUser = asyncHandler(async(req,res)=>{           // to logout we need to use middlewares....jaane se phele mil k jaana  // will design our own middleware 
+   await User.findByIdAndUpdate(req.user._id ,               // it will find user by id and update the with given object
+        {
+            $set: {                                        // $set does that what we have to update give me in object  and it will update 
+                refreshToken : undefined
+            }  
+        },
+        {
+            new: true
+        }
+    
+    )
+
+    const options ={               
+        httpOnly: true,                        // for cookies as written in loginUser as well      
+        secure: true              
+    }
+
+    return res
+    .status(200)
+    .clearCookie("accessToken", options)                             // clearcookie method available hota hai phele se becuase we have added cookieParser()
+    .clearCookie("refreshToken",options)
+    .json(200, {}, "User LoggedOut")
+})
+                                                           
+
+
+export{
+    registerUser,
+    loginUser,
+    logoutUser
+};

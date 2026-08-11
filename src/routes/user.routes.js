@@ -1,6 +1,7 @@
 import { Router } from "express";
-import registerUser from "../controllers/user.controller.js";
+import { loginUser, logoutUser, registerUser } from "../controllers/user.controller.js";
 import {upload} from "../middlewares/multer.middleware.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 
 const router = Router();                    // just like we do for express: app = express()this is same way for router 
@@ -17,6 +18,12 @@ router.route("/register").post(                   // POST send data to server
         }
     ]),
     registerUser
-)          
+)  
+
+router.route("/login").post(loginUser)
+
+// secured Routes
+
+router.route("/logout").post(verifyJWT, logoutUser)          // verifyJWt is middleware create by own in auth midd.js
 
 export default router;
