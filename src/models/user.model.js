@@ -62,7 +62,7 @@ userSchema.methods.isPasswordCorrect = async function(password){        //create
     return await bcrypt.compare(password, this.password)
 }  
 
-userSchema.methods.generateAccessToken = async function(){             //created methods to inject in schema for access token its a jwt token
+userSchema.methods.generateAccessToken = function(){             //created methods to inject in schema for access token its a jwt token
    return jwt.sign(                                                          // sign() generate the token
         {
           _id: this._id,
@@ -77,7 +77,7 @@ userSchema.methods.generateAccessToken = async function(){             //created
     )                                                        
 }     
 
-userSchema.methods.generateRefreshToken = async function(){
+userSchema.methods.generateRefreshToken = function(){                           // here the error was causing because used async in access and refresh token method....."token was not genrating"
      return jwt.sign(                                                          // sign() generate the token
         {
           _id: this._id,

@@ -122,10 +122,18 @@ const loginUser = asyncHandler(async(req,res)=>{
     // send refresh token and access token in cookies(which is send cookies)
 
     const {email, username, password} = req.body    // getting user data from frontend or req.body
+    console.log("email")
 
-    if(!username || !email){                       // here we'r doing with either email or username ...if we want to do with any of one then remove the remaining one like username or email 
+    if(!username && !email){                       // here we'r doing with both  email and username ...if we want to do with any of one then remove the remaining one like username or email 
         throw new apiError(400, "Username or Email is required")
     }
+
+    // Here is an alternative of above code based on logic discussed 
+    // if(!username || !email){  
+    //    throw new apiError(400, "Username or Email is required")
+    // }
+    
+
 
     const user = await User.findOne({                      // finding user from username or email ...on the base of anyone a data/user should get 
         $or: [{username},{email}]                          // $or means yaa to username k base pe mil jaaye yaa phir email k base pe mil jaaye 
@@ -190,7 +198,7 @@ const logoutUser = asyncHandler(async(req,res)=>{           // to logout we need
     .status(200)
     .clearCookie("accessToken", options)                             // clearcookie method available hota hai phele se becuase we have added cookieParser()
     .clearCookie("refreshToken",options)
-    .json(200, {}, "User LoggedOut")
+    .json(new apiResponse(200, {}, "User LoggedOut"))
 })
                                                            
 
