@@ -277,7 +277,7 @@ const updateAccountDetails = asyncHandler(async(req,res)=>{                 // u
         throw new apiError(400, "All fields are required")
     }
 
-    const user = User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
@@ -348,6 +348,76 @@ const updateUserCoverImage = asyncHandler(async(req,res)=>{                     
     .json(new apiResponse(200), user, "CoverImage Updated Successfully")
 })
 
+// Aggregation Pipeline (SDE-II & SDE-III) Concept
+
+const getUserChannelProfile = asyncHandler(async(req,res)=>{                 // here getting subscriber and subscribed detials of channel
+    const {username} = req.params                                        // req.params se url lenge channel ka 
+
+    if(!username?.trim()){
+        throw new apiError(400,"Username is missing")
+    }
+
+    const channel = await User.aggregate([                         // created aggregation pipeline
+        {
+            $match:{                                                //created 1st pipeline ....$match used to filter docum based on the given conditions  
+                username: username?.toLowerCase()                   // $match we matched the user here 
+            }                                                       
+        },
+        {
+            $lookup:{                                                   // 2nd pipeline    ...here we find the subscribers 
+                from: "subscriptions",                                 // this subscription came from subs.model.js  ....so in model everything becomes lowercase and also plural('s)
+                localField: "_id",                                     // $lookup joins daita from the another collection
+                foreignField: "channel",                               // here we did count the subscriber through the channel
+                as: "subscribers"
+            }
+        },
+        { 
+            $lookup:{                                                 // 3rd pipeline created .....here we find the subcribed we have done     
+                from:"subscriptions",
+                localField: "_id",                                    // here we did count that how much we have sunbscribed through subscribers
+                foreignField: "subscriber",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields:{                                                 // 4th pipeline... $addfields add the fields
+                subscribersCount:{                                       // added field to get the subscribers and subscribed count
+                    $size: "$subscribers"                                // $size is an aggregation operator/expression which gives the number of elements in array 
+                },
+                channelsSubscribedToCount:{
+                    $size: "$subscribedTo"
+                },
+                isSubscribed:{ 
+                    $cond:{                                                    // $cond (condition) is an aggregation operator/expression which performs if - then - else logic                              
+                        if:{$in: [req.user?._id , "$subscribers.subcriber"]},   //$in operator means present hai yaa nhi hai (is this value present in the array or object ?) 
+                        then: true,                                             // $in can see in arrays as well and also in object
+                        else: false
+                    }                                                           
+                }
+            }
+        },
+        {
+            $project:{                                              //5th pipeline.....$project it gives projection to give only selected portion 
+                fullname: 1,
+                username: 1,
+                subscribersCount: 1,
+                channelsSubscribedToCount: 1,
+                isSubscribed: 1,
+                avatar: 1,
+                coverImage: 1,
+                email: 1
+            }
+        }
+
+    ])
+    if(!channel?.length){
+        throw apiError(404, "Channel does'nt exists")
+    }
+    return res
+    .status(200)
+    .json(new apiResponse(200, channel[0], "User Channel Fetched Successfully"))                        // returning 1st object  
+})
+
 
 export{
     registerUser,
@@ -358,5 +428,7 @@ export{
     getCurrentUser,
     updateAccountDetails,
     updateUserAvatar,
-    updateUserCoverImage
+    updateUserCoverImage,
+    getUserChannelProfile
+
 };
