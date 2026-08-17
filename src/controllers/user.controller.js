@@ -351,7 +351,7 @@ const updateUserCoverImage = asyncHandler(async(req,res)=>{                     
 // Aggregation Pipeline (SDE-II & SDE-III) Concept
 
 const getUserChannelProfile = asyncHandler(async(req,res)=>{                 // here getting subscriber and subscribed detials of channel
-    const {username} = req.params                                        // req.params se url lenge channel ka 
+    const {username} = req.params                                           // req.params se url lenge channel ka 
 
     if(!username?.trim()){
         throw new apiError(400,"Username is missing")
@@ -364,17 +364,17 @@ const getUserChannelProfile = asyncHandler(async(req,res)=>{                 // 
             }                                                       
         },
         {
-            $lookup:{                                                   // 2nd pipeline    ...here we find the subscribers 
+            $lookup:{                                                   // 2nd pipeline    ...here we find the subscribers ....here we doing count of the subscriber through the channel
                 from: "subscriptions",                                 // this subscription came from subs.model.js  ....so in model everything becomes lowercase and also plural('s)
-                localField: "_id",                                     // $lookup joins daita from the another collection
-                foreignField: "channel",                               // here we did count the subscriber through the channel
+                localField: "_id",                                     // $lookup joins data from the another collection
+                foreignField: "channel",                               
                 as: "subscribers"
             }
         },
         { 
-            $lookup:{                                                 // 3rd pipeline created .....here we find the subcribed we have done     
+            $lookup:{                                                 // 3rd pipeline created .....here we find the subcribed we have done  ....here we are doing count that how much we have sunbscribed through subscribers   
                 from:"subscriptions",
-                localField: "_id",                                    // here we did count that how much we have sunbscribed through subscribers
+                localField: "_id",                                    
                 foreignField: "subscriber",
                 as: "subscribedTo"
             }
@@ -415,9 +415,11 @@ const getUserChannelProfile = asyncHandler(async(req,res)=>{                 // 
     }
     return res
     .status(200)
-    .json(new apiResponse(200, channel[0], "User Channel Fetched Successfully"))                        // returning 1st object  
+    .json(new apiResponse(200, channel[0], "User Channel Fetched Successfully"))         // returning 1st object  
 })
 
+
+// Very advanced level and complex level of pipline used here 
 
 export{
     registerUser,
