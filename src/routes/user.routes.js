@@ -1,7 +1,20 @@
 import { Router } from "express";
-import { loginUser, logoutUser, registerUser, refreshAccessToken } from "../controllers/user.controller.js";
-import {upload} from "../middlewares/multer.middleware.js";
+import { 
+    loginUser,
+    logoutUser,
+    registerUser,
+    refreshAccessToken, 
+    changeCurrentPassword, 
+    getCurrentUser, 
+    updateAccountDetails, 
+    updateUserAvatar, 
+    updateUserCoverImage, 
+    getUserChannelProfile, 
+    getWatchHistory 
+} from "../controllers/user.controller.js";
+import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { verify } from "jsonwebtoken";
 
 
 
@@ -27,5 +40,11 @@ router.route("/login").post(loginUser)
 
 router.route("/logout").post(verifyJWT, logoutUser)          // verifyJWt is middleware create by own in auth midd.js
 router.route("/refresh-token").post(refreshAccessToken)      // added refreshtoken endpoint
-
+router.route("/change-password").post(verifyJWT, changeCurrentPassword)             // we add verifyjwt because only verfied person only can access this route...ex who is logged-in only he can access this
+router.route("/current-user").get(verifyJWT,getCurrentUser)                       // here data is not sending any user so written get method 
+router.route("/update-account").patch(verifyJWT, updateAccountDetails)   // here patch otherwise it will update all the details in POST
+router.route("/avatar").patch(verifyJWT, upload.single("avatar"), updateUserAvatar)        // here we have second middleware also "upload" which we got from multer       
+router.route("/cover-image").patch(verifyJWT, upload.single("coverImage"), updateUserCoverImage)
+router.route("/c/:username").get(verifyJWT, getUserChannelProfile) // here why the /c/:usernname because we have take data from req.params so in this way we have to give routes and also we have given username                                               
+router.route("/history").get(verifyJWT, getWatchHistory)
 export default router;
