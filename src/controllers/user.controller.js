@@ -421,6 +421,58 @@ const getUserChannelProfile = asyncHandler(async(req,res)=>{                 // 
 
 // Very advanced level and complex level of pipline used here 
 
+const getWatchHistory = asyncHandler(async(req,res)=>{                    // here we are getting watchhistory endpoint
+    const user = await User.aggregate()([
+        {
+            $match :{
+                _id: new mongoose.Types.ObjectId(req.uer._id)
+            }
+        },
+        {
+            $lookup:{
+                from: "videos",
+                localField: "watchHistory",
+                foreignField:"_id",
+                as: "watchHistory",
+                pipeline:[                        // here we r doing sub pipeline or nested pipeline
+                    {
+                        $lookup:{                 // here we r in video.js
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline:[
+                                {
+                                    $project:{
+                                        fullname:1,
+                                        username:1,
+                                        avatar:1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields:{                                  // this we r doing only for frontend guys so that unlog ko data achhe se jaye  ...not imp to write this pipeline
+                            owner:{                                   // so by using this we are not giving array(default) as data to Frontend guys instaed we r giving the 1st value 
+                                $first :"$owner"
+                            }
+                        }                             
+                    }
+                ]                                                   
+            }
+        }
+    ])
+
+    return res
+    .status(200)
+    .json(
+        new apiResponse(200), 
+        user[0].watchHistory,
+        "Watch History Fetched Successfully"
+     )
+})
+
 export{
     registerUser,
     loginUser,
@@ -431,6 +483,7 @@ export{
     updateAccountDetails,
     updateUserAvatar,
     updateUserCoverImage,
-    getUserChannelProfile
+    getUserChannelProfile,
+    getWatchHistory
 
 };
